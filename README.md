@@ -1,4 +1,4 @@
-# nginx-s3-auth
+# nginx-spaces-auth
 
 A Docker container for proxying private DigitalOcean Spaces buckets publicly within management droplets.
 
