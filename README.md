@@ -18,6 +18,9 @@ and from the API itself without going through the proxy.
 
     Once the container is running you should be able to visit: http://example.com:8000/listing.html
     and see all of your contents.
+4. Optional: Rsync your files using something like this: https://github.com/seedifferently/boto_rsync
+   (This still works, even though it's 6 years old. Nice and lightweight:
+   `boto-rsync --endpoint nyc3.digitaloceanspaces.com -a foo -s bar /path/to/folder/ s3://your_bucket_name/`
 
 
 (NOTE: ./run.sh in the Dockerfile does support basic HTTP auth, but I've commented that out
