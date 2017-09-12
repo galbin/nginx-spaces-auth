@@ -42,6 +42,16 @@
 	      margin-right: 4px;
 	    }
 	  </style>
+	  <script>
+	  function toggle(id) {
+		var attr = $(id).attr('style');
+		if (typeof attr !== typeof undefined && attr !== false) {
+			$(id).removeAttr('style');
+		} else {
+			$(id).attr('style', "display: none");
+		}
+	  }
+	  </script>
 
 	  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 	  <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.1.2/handlebars.min.js"></script>
@@ -51,31 +61,23 @@
 
 	  <div class="container">
   	  <h1 id="h1-title">Bucket loading...</h1>
-  	  <table class="hide-while-loading table table-striped">
-  	    <thead>
-  	      <tr>
-  	        <th>Name</th>
-  	        <th>Date Modified</th>
-  	        <th>Size</th>
-  	        <th>Type</th>
-  	      </tr>
-  	    </thead>
-  	    <tbody id="tbody-content">
-  	    </tbody>
-  	  </table>
+            <table class='table table-striped' id='tbody-content'></table>
 	  </div>
 
   <script id="file-or-folder" type="text/x-handlebars-template">
     <tr>
       {{#if isFolder}}
-        <td><i class="icon-chevron-down i-expand-collapse" style="margin-left:calc(({{numLevels}} - 1) * 16px)");></i><i class="icon-folder-open i-file-or-folder" style="margin-left:4px;"></i>
-        {{simpleFilename}}</td>
+        <td>
+	    <a style="cursor: pointer" onclick="toggle('#folder{{idcount}}')">
+	<i class="icon-chevron-down i-expand-collapse" style="margin-left:calc(({{numLevels}} - 1) * 16px)");></i><i class="icon-folder-open i-file-or-folder" style="margin-left:4px;"></i>
+        {{simpleFilename}}
+	    </a>
+	</td>
       {{else}}
         <td><i class="icon-file i-file-or-folder"  style="margin-left:calc(({{numLevels}} * 16px) + 4px);"></i>
         <a href="{{url}}">{{simpleFilename}}</a></td>
       {{/if}}
       <td>{{friendlyLastModified}}</td>
-
       <td>{{friendlySizeName}}</td>
       <td>{{type}}</td>
     </tr>
@@ -83,6 +85,7 @@
 	<script>
 	(function($){
 	  "use strict";
+          var whoami = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
 	  var FOLDER_PATTERN = new RegExp('/$');
 	  var TYPE_PATTERN = new RegExp('\\.([^\\.\\s]{1,10})$');
 		var KB = 1024;
@@ -118,7 +121,6 @@
 	    self.key = key;
 
 	    // init logic
-            console.log("Testing folder pattern: against: " + self.key);
 	    self.isFolder = FOLDER_PATTERN.test(self.key);
 	    self.filename = self.isFolder ? self.key.replace(FOLDER_PATTERN,'') : self.key;
 	    self.url = bucketUrl + '/' + self.key;
@@ -170,9 +172,43 @@
 			});
 
 			// fill in the rows
-			var str = '';
+			var str = '<tr><td>Name</td><td>Date Modified</td><td>Size</td><td>Type</td></tr>';
+			var last_level = -1;
+                        var idcount = 0;
 			for (var i = 0; i < filesOrFolders.length; i ++) {
-				str += compiledTemplate(filesOrFolders[i]);
+                                var fob = filesOrFolders[i];
+
+				last_level = fob.numLevels;
+
+				if (fob.filename.indexOf(whoami) !== -1)
+					continue;
+				var nextfob = false;
+				if (i <= (filesOrFolders.length - 1))  {
+                                	var nextfob = filesOrFolders[i + 1];
+				}
+
+				fob.idcount = idcount;
+				str += compiledTemplate(fob);
+
+                                if (fob.isFolder) {
+					str += "<tr><td id='folder" + idcount + "' colspan='4' style='display: none'>";
+					str += "<table class='table table-striped'><tr><td style='margin-left:" + ((fob.numLevels - 1) * 16 + 4) + "px'>Name</td><td>Date Modified</td><td>Size</td><td>Type</td></tr>";
+					idcount++;
+				}
+
+
+				if (nextfob && nextfob.numLevels < fob.numLevels) {
+					for (var z = (fob.numLevels - nextfob.numLevels); z > 0; z--) {
+						str += "</table>"
+						str += "</td></tr>";
+					}
+				}
+			}
+                        if (last_level != -1) {
+				for (var i = last_level; i > 1; i--) {
+					str += "</table>"
+					str += "</td></tr>";
+				}
 			}
 			$tbodyContent.append(str);
 			$('.hide-while-loading').show();
