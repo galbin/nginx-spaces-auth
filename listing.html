@@ -69,12 +69,12 @@
       {{#if isFolder}}
         <td>
 	    <a style="cursor: pointer" onclick="toggle('#folder{{idcount}}')">
-	<i class="icon-chevron-down i-expand-collapse" style="margin-left:calc(({{numLevels}} - 1) * 16px)");></i><i class="icon-folder-open i-file-or-folder" style="margin-left:4px;"></i>
+	<i class="icon-chevron-down i-expand-collapse" style="margin-left:calc(numLevels - 1 * 16px);"></i><i class="icon-folder-open i-file-or-folder" style="margin-left:4px;"></i>
         {{simpleFilename}}
 	    </a>
 	</td>
       {{else}}
-        <td><i class="icon-file i-file-or-folder"  style="margin-left:calc(({{numLevels}} * 16px) + 4px);"></i>
+        <td><i class="icon-file i-file-or-folder"  style="margin-left:calc(numLevels * 16px + 4px);"></i>
         <a href="{{url}}">{{simpleFilename}}</a></td>
       {{/if}}
       <td>{{friendlyLastModified}}</td>
